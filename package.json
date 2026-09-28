@@ -1,0 +1,13 @@
+{
+  "name": "security-app-manager",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node scripts/serve.mjs",
+    "test": "node --test tests/all-sites.test.js tests/manager-delete-ui.test.js tests/manager-deletions.test.js"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8"
+  }
+}

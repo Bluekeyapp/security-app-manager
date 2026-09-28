@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101318">
+  <title>SAB Security - Tableau patron</title>
+  <link rel="icon" href="./assets/sab-securite-logo-clean.png" type="image/png">
+  <link rel="stylesheet" href="./styles/app.css?v=55">
+  <link rel="stylesheet" href="./styles/manager.css?v=6">
+</head>
+<body class="manager-body">
+  <div class="manager-shell">
+    <aside class="manager-sidebar">
+      <div class="brand-lockup">
+        <img class="brand-mark" src="./assets/sab-securite-logo-clean.png" width="42" height="42" alt="">
+        <div>
+          <strong>SAB Security</strong>
+          <p class="sidebar-caption">Espace manager</p>
+        </div>
+      </div>
+      <nav class="manager-navigation" aria-label="Navigation principale" hidden>
+        <a href="#overview" aria-label="Vue d'ensemble"><span class="nav-label-full">Vue d'ensemble</span><span class="nav-label-short" aria-hidden="true">Accueil</span></a>
+        <a href="#sites" aria-label="Sites et QR codes"><span class="nav-label-full">Sites et QR codes</span><span class="nav-label-short" aria-hidden="true">Sites</span></a>
+        <a href="#agents" aria-label="Agents"><span class="nav-label-full">Agents</span><span class="nav-label-short" aria-hidden="true">Agents</span></a>
+        <a href="#reports" aria-label="Rapports clients"><span class="nav-label-full">Rapports clients</span><span class="nav-label-short" aria-hidden="true">Rapports</span></a>
+        <a href="#journal" aria-label="Journal d'activité"><span class="nav-label-full">Journal d'activité</span><span class="nav-label-short" aria-hidden="true">Journal</span></a>
+      </nav>
+      <div class="sidebar-account" hidden><strong>Administration</strong><p class="sidebar-caption">Compte manager</p></div>
+    </aside>
+
+    <main class="manager-view" id="managerView"></main>
+  </div>
+
+  <dialog class="qr-dialog" id="qrDialog">
+    <div class="qr-print-sheet">
+      <p class="eyebrow" id="qrDialogSite">Site</p>
+      <h2 id="qrDialogTitle">Point de contrôle</h2>
+      <img id="qrDialogImage" alt="">
+      <p class="qr-instruction">Scanner avec l'application SAB Security</p>
+    </div>
+    <div class="qr-dialog-actions">
+      <button class="secondary-button" type="button" onclick="document.getElementById('qrDialog').close()">Fermer</button>
+      <a class="secondary-button" id="qrDownloadButton" download target="_blank" rel="noopener">Télécharger</a>
+      <a class="primary-button" id="qrPrintButton" target="_blank" rel="noopener">Imprimer</a>
+    </div>
+    <p id="qrOutputStatus" role="status" hidden></p>
+    <a id="qrOutputFallback" class="secondary-button" target="_blank" rel="noopener" hidden>Ouvrir le fichier</a>
+  </dialog>
+
+  <script src="./vendor/qrcode.js"></script>
+  <script src="./vendor/jspdf.umd.min.js"></script>
+  <script type="module" src="./src/manager.js?v=58"></script>
+</body>
+</html>

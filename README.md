@@ -42,4 +42,3 @@ The browser uses the publishable Supabase key in `src/config.js`. Manager author
 ## Deployment
 
 This repository is a static site. Configure the hosting provider to publish the repository root; no build command is required. The manager entry point is `manager.html`.
-

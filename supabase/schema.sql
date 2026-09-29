@@ -89,6 +89,8 @@ alter table public.checkpoints enable row level security;
 alter table public.tours enable row level security;
 alter table public.tour_scans enable row level security;
 
+-- New databases start closed. Later migrations add manager-only policies and
+-- RPC access; there is no window with public access to agents or patrol data.
 drop policy if exists "public read sites" on public.sites;
 drop policy if exists "public read agents" on public.agents;
 drop policy if exists "public upsert agents" on public.agents;
@@ -100,15 +102,3 @@ drop policy if exists "public update tours" on public.tours;
 drop policy if exists "public read tour_scans" on public.tour_scans;
 drop policy if exists "public insert tour_scans" on public.tour_scans;
 drop policy if exists "public update tour_scans" on public.tour_scans;
-
-create policy "public read sites" on public.sites for select using (true);
-create policy "public read agents" on public.agents for select using (true);
-create policy "public upsert agents" on public.agents for insert with check (true);
-create policy "public update agents" on public.agents for update using (true) with check (true);
-create policy "public read checkpoints" on public.checkpoints for select using (true);
-create policy "public read tours" on public.tours for select using (true);
-create policy "public insert tours" on public.tours for insert with check (true);
-create policy "public update tours" on public.tours for update using (true) with check (true);
-create policy "public read tour_scans" on public.tour_scans for select using (true);
-create policy "public insert tour_scans" on public.tour_scans for insert with check (true);
-create policy "public update tour_scans" on public.tour_scans for update using (true) with check (true);

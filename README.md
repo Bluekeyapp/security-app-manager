@@ -28,7 +28,7 @@ npm test
 
 ## Supabase setup
 
-The `supabase/` directory contains the schema and migrations used by the dashboard. Apply them in the existing Supabase project in this order when setting up a new database:
+The `supabase/` directory contains the schema and migrations used by the dashboard. For a new database, apply them in this order. Do not replay `schema.sql` against an existing production database; inspect its migration state first.
 
 1. `schema.sql`
 2. `security-migration.sql`
@@ -38,6 +38,9 @@ The `supabase/` directory contains the schema and migrations used by the dashboa
 6. `all-agents-all-sites.sql`
 7. `clear-activity-history.sql`
 8. `qr-management.sql`
+9. `api-grants.sql`
+
+The final migration grants authenticated managers read access to the tables used by the dashboard. Manager-only row policies still restrict the rows. This works with Supabase's "Automatically expose new tables" setting turned off.
 
 Create the manager account in Supabase Authentication, then grant access with the account's user ID:
 

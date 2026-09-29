@@ -54,4 +54,4 @@ The browser uses the publishable Supabase key in `src/config.js`. Manager author
 
 ## Deployment
 
-This repository is a static site. The GitHub Pages workflow runs tests before publishing only the runtime files. For other static hosts, publish `index.html`, `manager.html`, `.nojekyll`, and the `assets/`, `src/`, `styles/`, and `vendor/` directories together. No build command is required. The manager entry point is `manager.html`.
+This repository is a static site. Cloudflare Pages publishes the `main` branch at https://security-app-manager.pages.dev/. GitHub Actions runs tests on pushes and pull requests. No build command is required. The manager entry point is `manager.html`; publish it with `index.html` and the `assets/`, `src/`, `styles/`, and `vendor/` directories.

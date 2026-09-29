@@ -5,13 +5,3 @@ Thumbs.db
 test-qrcodes/
 tmp-verification/
 _site/
-
-# Files belonging to the agent repository.
-src/app.js
-src/patrol.js
-src/storage.js
-src/remoteStore.js
-tests/patrol.test.js
-tests/storage.test.js
-manifest.webmanifest
-sw.js

@@ -55,3 +55,7 @@ The browser uses the publishable Supabase key in `src/config.js`. Manager author
 ## Deployment
 
 This repository is a static site. Cloudflare Pages publishes the `main` branch at https://security-app-manager.pages.dev/. GitHub Actions runs tests on pushes and pull requests. No build command is required. The manager entry point is `manager.html`; publish it with `index.html` and the `assets/`, `src/`, `styles/`, and `vendor/` directories.
+
+## Remembered agent sessions
+
+After `supabase/clear-activity-history.sql`, apply `supabase/remembered-agent-sessions.sql` before deploying the agent client's « Rester connecté » option. It creates 30-day opaque bearer tokens. Only SHA-256 token hashes are stored server-side; the PIN is never persisted in the agent browser. Sessions are invalidated by sign out, agent deactivation, PIN reset, expiry, or the global activity reset.

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node scripts/serve.mjs",
-    "test": "node --test tests/all-sites.test.js tests/api-grants.test.js tests/manager-delete-ui.test.js tests/manager-deletions.test.js"
+    "test": "node --test tests/all-sites.test.js tests/api-grants.test.js tests/manager-delete-ui.test.js tests/manager-deletions.test.js tests/remembered-agent-sessions.test.js"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8"

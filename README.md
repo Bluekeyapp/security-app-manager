@@ -40,7 +40,7 @@ The `supabase/` directory contains the schema and migrations used by the dashboa
 8. `qr-management.sql`
 9. `api-grants.sql`
 
-The final migration grants authenticated managers read access to the tables used by the dashboard. Manager-only row policies still restrict the rows. This works with Supabase's "Automatically expose new tables" setting turned off.
+The final migration grants authenticated managers read access to the tables used by the dashboard and revokes anonymous access to manager RPCs. Manager-only row policies still restrict the rows. This works with Supabase's "Automatically expose new tables" setting turned off.
 
 Create the manager account in Supabase Authentication, then grant access with the account's user ID:
 

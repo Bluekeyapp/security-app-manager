@@ -96,4 +96,4 @@ Creer le projet Supabase, puis ajouter dans l'application :
 - une page patron `/manager.html`,
 - les scripts SQL de creation des tables.
 
-La version de test peut rester hebergee en web. GitHub Pages peut afficher l'interface, mais l'ecriture des scans ira dans Supabase.
+La version de test peut rester hebergee en web. Cloudflare Pages affiche l'interface, et l'ecriture des scans va dans Supabase.

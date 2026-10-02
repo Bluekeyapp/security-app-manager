@@ -28,6 +28,12 @@ npm test
 
 ## Supabase setup
 
+The manager login offers **Rester connecté**. When selected, Supabase's session
+tokens are saved on this device and refreshed by the SDK. Otherwise they stay in
+the current browser session. The password is never saved by the app. Signing out
+clears the remembered session. Existing logins saved before this option may need
+to sign in once again to choose whether to stay connected.
+
 The `supabase/` directory contains the schema and migrations used by the dashboard. For a new database, apply them in this order. Do not replay `schema.sql` against an existing production database; inspect its migration state first.
 
 1. `schema.sql`

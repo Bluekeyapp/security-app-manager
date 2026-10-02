@@ -1,4 +1,5 @@
-import { getSupabaseClient } from "./supabaseClient.js";
+import { getSupabaseClient } from "./supabaseClient.js?v=2";
+import { managerSessionStorage } from "./managerSessionStorage.js?v=1";
 
 export async function getManagerSession() {
   const supabase = await getSupabaseClient();
@@ -10,19 +11,29 @@ export async function getManagerSession() {
     : { ok: true, session: data.session || null };
 }
 
-export async function signInManager(email, password) {
+export async function signInManager(email, password, { remember = false } = {}) {
   const supabase = await getSupabaseClient();
   if (!supabase) return { ok: false, error: new Error("Supabase non configuré") };
+
+  try {
+    managerSessionStorage.setRemember(remember);
+  } catch (error) {
+    return { ok: false, storageUnavailable: true, error };
+  }
 
   const { data, error } = await supabase.auth.signInWithPassword({
     email: String(email || "").trim(),
     password: String(password || "")
-  });
-  if (error) return { ok: false, error };
+  }).catch((error) => ({ data: {}, error }));
+  if (error) {
+    managerSessionStorage.clear();
+    return { ok: false, error };
+  }
 
   const authorization = await verifyManagerAccess();
   if (!authorization.ok || !authorization.authorized) {
     await supabase.auth.signOut();
+    managerSessionStorage.clear();
     return { ok: false, unauthorized: true, error: authorization.error };
   }
 
@@ -31,9 +42,13 @@ export async function signInManager(email, password) {
 
 export async function signOutManager() {
   const supabase = await getSupabaseClient();
-  if (!supabase) return { ok: true };
+  if (!supabase) {
+    managerSessionStorage.clear();
+    return { ok: true };
+  }
 
-  const { error } = await supabase.auth.signOut();
+  const { error } = await supabase.auth.signOut().catch((error) => ({ error }));
+  if (!error) managerSessionStorage.clear();
   return error ? { ok: false, error } : { ok: true };
 }
 

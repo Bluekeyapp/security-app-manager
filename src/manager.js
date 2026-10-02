@@ -16,7 +16,7 @@ import {
   signOutManager,
   subscribeManagerUpdates,
   verifyManagerAccess
-} from "./managerRemoteStore.js";
+} from "./managerRemoteStore.js?v=2";
 
 const managerView = document.getElementById("managerView");
 // Published routes use a base URL for assets; navigation must stay on the manager page.
@@ -187,11 +187,16 @@ async function handleClick(event) {
   }
 
   if (action === "manager-signout") {
+    const result = await signOutManager();
+    if (!result.ok) {
+      state.error = "Impossible de se déconnecter. Vérifiez votre connexion et réessayez.";
+      renderDashboard();
+      return;
+    }
     stopLiveUpdates?.();
     stopLiveUpdates = null;
     window.clearTimeout(periodRolloverTimer);
     periodRolloverTimer = null;
-    await signOutManager();
     state.session = null;
     state.agents = [];
     state.tours = [];
@@ -349,9 +354,13 @@ async function handleManagerLogin(form) {
   submitButton.textContent = "Connexion...";
   state.error = "";
 
-  const result = await signInManager(formData.get("email"), formData.get("password"));
+  const result = await signInManager(formData.get("email"), formData.get("password"), {
+    remember: formData.has("rememberManager")
+  }).catch((error) => ({ ok: false, error }));
   if (!result.ok) {
-    state.error = result.unauthorized
+    state.error = result.storageUnavailable
+      ? "Cet appareil ne permet pas de mémoriser la connexion. Désactivez « Rester connecté » et réessayez."
+      : result.unauthorized
       ? "Ce compte n'est pas autorisé comme responsable."
       : "Adresse e-mail ou mot de passe incorrect.";
     renderLogin();
@@ -507,6 +516,14 @@ function renderLogin() {
         <label>
           Mot de passe
           <input name="password" type="password" autocomplete="current-password" required>
+        </label>
+        <label class="remember-manager">
+          <input name="rememberManager" type="checkbox" aria-describedby="rememberManagerHelp">
+          <span class="remember-manager-copy">
+            <span>Rester connecté</span>
+            <small id="rememberManagerHelp">Sur cet appareil uniquement</small>
+          </span>
+          <span class="remember-manager-switch" aria-hidden="true"></span>
         </label>
         <button class="primary-button" type="submit">Se connecter</button>
       </form>

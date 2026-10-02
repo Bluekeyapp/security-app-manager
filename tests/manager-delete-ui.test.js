@@ -4,7 +4,7 @@ import vm from "node:vm";
 import { readFile } from "node:fs/promises";
 
 const source = (await readFile(new URL("../src/manager.js", import.meta.url), "utf8"))
-  .replace(/^import \{[\s\S]*?from "\.\/managerRemoteStore.js";/, "")
+  .replace(/^import \{[\s\S]*?from "\.\/managerRemoteStore.js(?:\?v=\d+)?";/, "")
   .replace("initialize();", "");
 
 function setup(confirm, result = { ok: true }, historyResult = { ok: true, deletedCount: 2 }) {

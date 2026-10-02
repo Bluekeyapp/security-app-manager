@@ -8,18 +8,24 @@
   <link rel="icon" href="./assets/sab-securite-logo-clean.png" type="image/png">
   <link rel="stylesheet" href="./styles/app.css?v=55">
   <link rel="stylesheet" href="./styles/manager.css?v=6">
+  <link rel="stylesheet" href="./styles/manager-sidebar.css?v=1">
 </head>
 <body class="manager-body">
   <div class="manager-shell">
     <aside class="manager-sidebar">
-      <div class="brand-lockup">
+      <div class="sidebar-header">
+      <button class="brand-lockup sidebar-brand" type="button" aria-label="Déplier le menu" disabled>
         <img class="brand-mark" src="./assets/sab-securite-logo-clean.png" width="42" height="42" alt="">
-        <div>
+        <span class="sidebar-brand-copy">
           <strong>SAB Security</strong>
           <p class="sidebar-caption">Espace manager</p>
-        </div>
+        </span>
+      </button>
+      <button class="sidebar-toggle" type="button" aria-label="Replier le menu" aria-expanded="true" aria-controls="managerNavigation">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16m7-11-3 3 3 3"/></svg>
+      </button>
       </div>
-      <nav class="manager-navigation" aria-label="Navigation principale" hidden>
+      <nav class="manager-navigation sidebar-nav" id="managerNavigation" aria-label="Navigation principale" hidden>
         <a href="#overview" aria-label="Vue d'ensemble"><span class="nav-label-full">Vue d'ensemble</span><span class="nav-label-short" aria-hidden="true">Accueil</span></a>
         <a href="#sites" aria-label="Sites et QR codes"><span class="nav-label-full">Sites et QR codes</span><span class="nav-label-short" aria-hidden="true">Sites</span></a>
         <a href="#agents" aria-label="Agents"><span class="nav-label-full">Agents</span><span class="nav-label-short" aria-hidden="true">Agents</span></a>
@@ -50,6 +56,7 @@
 
   <script src="./vendor/qrcode.js"></script>
   <script src="./vendor/jspdf.umd.min.js"></script>
+  <script type="module" src="./src/managerSidebar.js?v=1"></script>
   <script type="module" src="./src/manager.js?v=59"></script>
 </body>
 </html>

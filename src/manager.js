@@ -50,6 +50,9 @@ let deletionPending = false;
 let stopLiveUpdates = null;
 let liveRefreshTimer = null;
 let periodRolloverTimer = null;
+let sessionGeneration = 0;
+let refreshSequence = 0;
+let signingOut = false;
 const bannerTimers = new Map();
 
 managerView.addEventListener("submit", handleSubmit);
@@ -111,10 +114,36 @@ async function initialize() {
     return;
   }
 
-  state.session = sessionResult.session;
+  await activateManagerSession(sessionResult.session);
+}
+
+async function activateManagerSession(session) {
+  state.session = session;
+  const generation = ++sessionGeneration;
   await refreshDashboard();
+  if (generation !== sessionGeneration || !state.session || signingOut) return;
   schedulePeriodRollover();
-  stopLiveUpdates = await subscribeManagerUpdates(scheduleLiveRefresh);
+  await startLiveUpdates();
+}
+
+function stopDashboardUpdates() {
+  stopLiveUpdates?.();
+  stopLiveUpdates = null;
+  window.clearTimeout(liveRefreshTimer);
+  window.clearTimeout(periodRolloverTimer);
+  liveRefreshTimer = null;
+  periodRolloverTimer = null;
+}
+
+async function startLiveUpdates() {
+  stopLiveUpdates?.();
+  stopLiveUpdates = null;
+  const generation = sessionGeneration;
+  const stop = await subscribeManagerUpdates(() => {
+    if (generation === sessionGeneration) scheduleLiveRefresh();
+  });
+  if (generation !== sessionGeneration || !state.session || signingOut) stop();
+  else stopLiveUpdates = stop;
 }
 
 async function handleSubmit(event) {
@@ -187,19 +216,34 @@ async function handleClick(event) {
   }
 
   if (action === "manager-signout") {
-    const result = await signOutManager();
+    if (signingOut) return;
+    signingOut = true;
+    ++sessionGeneration;
+    stopDashboardUpdates();
+    const result = await signOutManager().catch((error) => ({ ok: false, error }));
+    signingOut = false;
     if (!result.ok) {
       state.error = "Impossible de se déconnecter. Vérifiez votre connexion et réessayez.";
       renderDashboard();
+      schedulePeriodRollover();
+      await startLiveUpdates();
       return;
     }
-    stopLiveUpdates?.();
-    stopLiveUpdates = null;
-    window.clearTimeout(periodRolloverTimer);
-    periodRolloverTimer = null;
     state.session = null;
     state.agents = [];
     state.tours = [];
+    state.sites = [];
+    state.checkpoints = [];
+    state.expandedAgentIds.clear();
+    state.expandedSiteIds.clear();
+    state.agentFormOpen = false;
+    state.siteFormOpen = false;
+    state.clearHistoryConfirmOpen = false;
+    state.lastUpdated = null;
+    state.clientReports = {
+      activity: { siteId: "", from: "", to: "" },
+      incidents: { siteId: "", from: "", to: "" }
+    };
     state.message = "";
     state.error = "";
     renderLogin();
@@ -219,6 +263,7 @@ async function handleClick(event) {
   }
 
   if (action === "toggle-agent-panel") {
+    captureExpandedPanels();
     const agentId = event.target.closest("[data-agent-panel-id]").dataset.agentPanelId;
     if (state.expandedAgentIds.has(agentId)) state.expandedAgentIds.delete(agentId);
     else state.expandedAgentIds.add(agentId);
@@ -367,9 +412,7 @@ async function handleManagerLogin(form) {
     return;
   }
 
-  state.session = result.session;
-  await refreshDashboard();
-  schedulePeriodRollover();
+  await activateManagerSession(result.session);
 }
 
 async function handleCreateAgent(form) {
@@ -392,6 +435,8 @@ async function handleCreateAgent(form) {
 
   if (!result.ok) {
     state.error = getManagerError(result.error);
+    submitButton.disabled = false;
+    submitButton.textContent = "Créer l'agent";
     renderDashboard();
     return;
   }
@@ -422,6 +467,7 @@ async function handleCreateCheckpoint(form) {
   else {
     state.message = "Point de contrôle ajouté.";
     state.error = "";
+    form.reset?.();
   }
   await refreshDashboard(false);
 }
@@ -438,6 +484,7 @@ async function handleResetPin(form) {
   const submitButton = form.querySelector('button[type="submit"]');
   submitButton.disabled = true;
   const result = await resetManagedAgentPin(form.dataset.agentId, pin);
+  submitButton.disabled = false;
   if (!result.ok) {
     state.error = getManagerError(result.error);
     renderDashboard();
@@ -446,12 +493,16 @@ async function handleResetPin(form) {
 
   state.message = "PIN modifié.";
   state.error = "";
+  form.reset?.();
   await refreshDashboard();
 }
 
 async function refreshDashboard(showLoading = true) {
+  if (!state.session || signingOut) return;
+  const generation = sessionGeneration;
+  const request = ++refreshSequence;
   captureExpandedPanels();
-  if (showLoading) {
+  if (showLoading && !managerView.querySelector(".manager-toolbar")) {
     managerView.innerHTML = renderLoading("Lecture sécurisée des données...");
   }
   const [agentsResult, toursResult, sitesResult] = await Promise.all([
@@ -459,6 +510,9 @@ async function refreshDashboard(showLoading = true) {
     fetchManagerTours(),
     fetchManagerSites()
   ]);
+
+  // A newer request or a logout invalidates every result from this request.
+  if (generation !== sessionGeneration || request !== refreshSequence || !state.session || signingOut) return;
 
   if (!agentsResult.ok || !toursResult.ok || !sitesResult.ok) {
     state.error = getManagerError(agentsResult.error || toursResult.error || sitesResult.error);
@@ -480,18 +534,23 @@ async function refreshDashboard(showLoading = true) {
 }
 
 function scheduleLiveRefresh() {
+  if (!state.session || signingOut) return;
+  const generation = sessionGeneration;
   window.clearTimeout(liveRefreshTimer);
   liveRefreshTimer = window.setTimeout(() => {
-    if (!deletionPending) refreshDashboard(false);
+    if (generation === sessionGeneration && state.session && !signingOut && !deletionPending) refreshDashboard(false);
   }, 450);
 }
 
 function schedulePeriodRollover() {
+  if (!state.session || signingOut) return;
+  const generation = sessionGeneration;
   window.clearTimeout(periodRolloverTimer);
   const now = new Date();
   const nextMidnight = new Date(now);
   nextMidnight.setHours(24, 0, 1, 0);
   periodRolloverTimer = window.setTimeout(() => {
+    if (generation !== sessionGeneration || !state.session || signingOut) return;
     renderDashboard();
     schedulePeriodRollover();
   }, nextMidnight.getTime() - now.getTime());
@@ -551,6 +610,14 @@ function scheduleBannerDismissal() {
 }
 
 function renderDashboard(capturePanels = true) {
+  if (!state.session || signingOut) return;
+  const forms = new Map();
+  for (const form of managerView.querySelectorAll("form")) {
+    const key = managerFormKey(form);
+    if (key) forms.set(key, form);
+  }
+  const focused = document.activeElement;
+  const selection = focused?.selectionStart == null ? null : [focused.selectionStart, focused.selectionEnd];
   scheduleBannerDismissal();
   if (capturePanels) captureExpandedPanels();
   const visibleTours = getVisibleTours();
@@ -618,7 +685,23 @@ function renderDashboard(capturePanels = true) {
     ${renderClearHistoryConfirmation()}
     <p class="manager-session-note">Connecté en tant que ${escapeHtml(state.session?.user?.email || "Responsable")}</p>
   `;
+  // Reuse the actual form nodes: drafts, PINs and caret positions stay only in memory.
+  for (const form of managerView.querySelectorAll("form")) {
+    const previous = forms.get(managerFormKey(form));
+    if (previous) form.replaceWith(previous);
+  }
   applyCategory();
+  if (focused?.isConnected && !focused.closest("[hidden]")) {
+    focused.focus({ preventScroll: true });
+    if (selection) focused.setSelectionRange(...selection);
+  }
+}
+
+function managerFormKey(form) {
+  if (form.id === "createAgentForm" || form.id === "createSiteForm") return form.id;
+  if (form.hasAttribute?.("data-checkpoint-form")) return `checkpoint:${form.dataset.siteId}`;
+  if (form.hasAttribute?.("data-pin-form")) return `pin:${form.dataset.agentId}`;
+  return null;
 }
 
 function renderClearHistoryConfirmation() {

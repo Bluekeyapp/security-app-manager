@@ -25,7 +25,7 @@ function setup(confirm, result = { ok: true }, historyResult = { ok: true, delet
   });
   vm.runInContext(source, context);
   context.fixture = agent;
-  vm.runInContext("state.agents = [fixture]; state.sites = [{id:'s',name:'Test Site'}]", context);
+  vm.runInContext("state.session = {user:{email:'manager@example.test'}}; state.agents = [fixture]; state.sites = [{id:'s',name:'Test Site'}]", context);
   const button = { dataset: { action: "delete-agent", id: "a" }, disabled: false };
   context.button = button;
   return { context, calls, historyCalls, view, button };

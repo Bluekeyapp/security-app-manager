@@ -45,6 +45,15 @@ The `supabase/` directory contains the schema and migrations used by the dashboa
 7. `clear-activity-history.sql`
 8. `qr-management.sql`
 9. `api-grants.sql`
+10. `remembered-agent-sessions.sql`
+11. `agent-pin-null-hardening.sql`
+
+Always apply `agent-pin-null-hardening.sql` last. It replaces four functions to
+reject missing or malformed PINs and make hash comparisons NULL-safe, without
+changing existing agent PINs or session records. Older migrations redefine these
+functions: if any are replayed, reapply this hardening migration afterward.
+Applying it to production is a separate database deployment; publishing the
+static apps alone does not install the fix.
 
 The final migration grants authenticated managers read access to the tables used by the dashboard and revokes anonymous access to manager RPCs. Manager-only row policies still restrict the rows. This works with Supabase's "Automatically expose new tables" setting turned off.
 

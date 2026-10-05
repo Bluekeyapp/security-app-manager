@@ -49,6 +49,7 @@ The `supabase/` directory contains the schema and migrations used by the dashboa
 11. `agent-pin-null-hardening.sql`
 12. `tour-write-ownership-hardening.sql`
 13. `agent-pin-attempts-hardening.sql`
+14. `agent-login-feedback.sql`
 
 Apply `agent-pin-null-hardening.sql` after migrations 1–10. It replaces four functions to
 reject missing or malformed PINs and make hash comparisons NULL-safe, without
@@ -66,7 +67,7 @@ retries and updates of the same owned tour remain supported. Existing rows,
 RLS, PIN validation and session records are preserved; no frontend deployment
 is required. Reapply this migration if older synchronizer migrations are replayed.
 
-Apply `agent-pin-attempts-hardening.sql` last. It locks the agent row before
+Apply `agent-pin-attempts-hardening.sql` after the ownership migration. It locks the agent row before
 checking the PIN and the existing five-attempt / fifteen-minute lockout. Failed
 route or tour session requests return a JSON error with PostgREST HTTP status 401
 and code `28000`, instead of raising an exception that rolls back the counter.
@@ -102,3 +103,10 @@ This repository is a static site. Cloudflare Pages publishes the `main` branch a
 ## Remembered agent sessions
 
 After `supabase/clear-activity-history.sql`, apply `supabase/remembered-agent-sessions.sql` before deploying the agent client's « Rester connecté » option. It creates 30-day opaque bearer tokens. Only SHA-256 token hashes are stored server-side; the PIN is never persisted in the agent browser. Sessions are invalidated by sign out, agent deactivation, PIN reset, expiry, or the global activity reset.
+
+Apply `agent-login-feedback.sql` after migration 13 and before publishing the new
+SAB Agent frontend. Its additive `agent_login` RPC returns a success envelope or
+a generic credential rejection / lockout with server-calculated remaining seconds.
+It reuses the existing authentication and remembered-session paths, counts each
+attempt once, and commits rejected attempts through normal HTTP 200 responses.
+Old login RPC contracts remain compatible. No PINs, sessions or patrols are deleted.

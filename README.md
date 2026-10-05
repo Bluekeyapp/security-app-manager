@@ -47,13 +47,23 @@ The `supabase/` directory contains the schema and migrations used by the dashboa
 9. `api-grants.sql`
 10. `remembered-agent-sessions.sql`
 11. `agent-pin-null-hardening.sql`
+12. `tour-write-ownership-hardening.sql`
 
-Always apply `agent-pin-null-hardening.sql` last. It replaces four functions to
+Apply `agent-pin-null-hardening.sql` after migrations 1–10. It replaces four functions to
 reject missing or malformed PINs and make hash comparisons NULL-safe, without
 changing existing agent PINs or session records. Older migrations redefine these
 functions: if any are replayed, reapply this hardening migration afterward.
 Applying it to production is a separate database deployment; publishing the
 static apps alone does not install the fix.
+
+Apply `tour-write-ownership-hardening.sql` afterward. It checks ownership in
+the conflict update itself for tours, scans and incidents, on both Badge/PIN
+session and remembered-token synchronization paths. A conflicting identifier
+from another tour or agent rejects and rolls back the entire request. The Agent
+keeps a rejected upload pending rather than silently discarding it. Legitimate
+retries and updates of the same owned tour remain supported. Existing rows,
+RLS, PIN validation and session records are preserved; no frontend deployment
+is required. Reapply this migration if older synchronizer migrations are replayed.
 
 The final migration grants authenticated managers read access to the tables used by the dashboard and revokes anonymous access to manager RPCs. Manager-only row policies still restrict the rows. This works with Supabase's "Automatically expose new tables" setting turned off.
 

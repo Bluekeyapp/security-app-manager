@@ -3,7 +3,7 @@ import {PGlite} from '@electric-sql/pglite';
 const sql = (name) => readFile(new URL(`../../supabase/${name}`, import.meta.url), 'utf8');
 const managerId = '00000000-0000-0000-0000-000000000010';
 
-export async function createLocalDatabase(t, {hardenPin = true} = {}) {
+export async function createLocalDatabase(t, {hardenPin = true, hardenOwnership = false} = {}) {
   const db = new PGlite();
   t.after(() => db.close());
   // PGlite does not provide pgcrypto here. These STRICT stand-ins reproduce
@@ -42,5 +42,6 @@ export async function createLocalDatabase(t, {hardenPin = true} = {}) {
     await db.exec(await sql(name));
   }
   if (hardenPin) await db.exec(await sql('agent-pin-null-hardening.sql'));
+  if (hardenOwnership) await db.exec(await sql('tour-write-ownership-hardening.sql'));
   return db;
 }

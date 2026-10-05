@@ -48,6 +48,7 @@ The `supabase/` directory contains the schema and migrations used by the dashboa
 10. `remembered-agent-sessions.sql`
 11. `agent-pin-null-hardening.sql`
 12. `tour-write-ownership-hardening.sql`
+13. `agent-pin-attempts-hardening.sql`
 
 Apply `agent-pin-null-hardening.sql` after migrations 1–10. It replaces four functions to
 reject missing or malformed PINs and make hash comparisons NULL-safe, without
@@ -64,6 +65,23 @@ keeps a rejected upload pending rather than silently discarding it. Legitimate
 retries and updates of the same owned tour remain supported. Existing rows,
 RLS, PIN validation and session records are preserved; no frontend deployment
 is required. Reapply this migration if older synchronizer migrations are replayed.
+
+Apply `agent-pin-attempts-hardening.sql` last. It locks the agent row before
+checking the PIN and the existing five-attempt / fifteen-minute lockout. Failed
+route or tour session requests return a JSON error with PostgREST HTTP status 401
+and code `28000`, instead of raising an exception that rolls back the counter.
+Login and session checks keep their existing empty/null/false rejection formats.
+No Agent frontend update is needed: Supabase's SDK already handles HTTP errors.
+Tour validation and ownership errors still roll back all tour writes. PINs,
+existing sessions, patrols and RLS are preserved. Older authentication or session
+migrations must be followed by reapplying this migration.
+
+This counter depends on normal PostgREST request transactions being committed.
+Before production acceptance, verify that `db-tx-end` is `commit` and that clients
+cannot request transaction rollback (no `commit-allow-override` setting). Never
+enable rollback overrides for these public authentication RPCs. SQL tests use
+PGlite, not the production PostgREST gateway; verify real HTTP 401 responses and
+counter persistence on an isolated Supabase test agent before accepting the fix.
 
 The final migration grants authenticated managers read access to the tables used by the dashboard and revokes anonymous access to manager RPCs. Manager-only row policies still restrict the rows. This works with Supabase's "Automatically expose new tables" setting turned off.
 

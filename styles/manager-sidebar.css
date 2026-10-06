@@ -41,6 +41,7 @@
 .sidebar-account-copy { min-width: 0; }
 .account-gear { display: grid; place-items: center; flex-shrink: 0; width: 44px; height: 44px; padding: 10px; border: 1px solid var(--line); border-radius: 13px; color: var(--text); background: var(--surface-2); cursor: pointer; touch-action: manipulation; }
 .account-gear:hover { background: #ffffff15; }
+.account-nav-label { display: none; }
 .account-gear:focus-visible { outline: 2px solid var(--accent, #ff8a35); outline-offset: 3px; }
 .manager-shell[data-sidebar-collapsed="true"] .sidebar-header { justify-content: center; padding: 12px 0; }
 .manager-shell[data-sidebar-collapsed="true"] .sidebar-brand { flex: 0; justify-content: center; cursor: pointer; border-radius: 10px; }
@@ -60,7 +61,11 @@
   .manager-navigation { flex-direction: row; gap: 4px; padding: 4px 8px 8px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
   .manager-navigation a { flex-direction: column; gap: 6px; min-height: 58px; padding: 8px 10px; font-size: 11px; border: 0; border-radius: 10px; }
   .manager-navigation a.active { border: 0; background: transparent; }
-  .sidebar-account { display: flex; margin: 0; padding: 8px 16px; min-height: 60px; }
+  .sidebar-account { display: none; }
+  .manager-navigation .account-gear { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; width: auto; height: auto; min-height: 58px; padding: 8px 10px; border: 0; border-radius: 10px; background: transparent; color: var(--muted); font: inherit; font-size: 11px; font-weight: 500; line-height: 1.3; }
+  .manager-navigation .account-gear svg { width: 20px; height: 20px; flex-shrink: 0; }
+  .manager-navigation .account-gear:hover { background: #ffffff0a; color: var(--text); }
+  .account-nav-label { display: inline; }
   .manager-navigation::-webkit-scrollbar { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {

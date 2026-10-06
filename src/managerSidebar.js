@@ -3,6 +3,9 @@ const shell = document.querySelector(".manager-shell");
 const navigation = document.getElementById("managerNavigation");
 const toggle = document.querySelector(".sidebar-toggle");
 const brand = document.querySelector(".sidebar-brand");
+const accountButton = document.getElementById("managerAccountButton");
+const accountArea = document.querySelector(".sidebar-account");
+accountButton.insertAdjacentHTML("beforeend", '<span class="account-nav-label">Compte</span>');
 const mobile = window.matchMedia("(max-width: 700px)");
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const preferenceKey = "sab-manager-sidebar-collapsed";
@@ -36,6 +39,8 @@ function updatePill() {
 }
 
 function applyCollapsed() {
+  // Keep one account button so its dialog and focus behavior survive resizing.
+  (mobile.matches ? navigation : accountArea).append(accountButton);
   const effectiveCollapsed = collapsed && !mobile.matches;
   shell.dataset.sidebarCollapsed = String(effectiveCollapsed);
   toggle.setAttribute("aria-expanded", String(!effectiveCollapsed));

@@ -200,6 +200,18 @@
 @keyframes account-window-in { from { opacity: 0; transform: translateY(24px) scale(.98); } to { opacity: 1; transform: none; } }
 @keyframes account-window-out { to { opacity: 0; transform: translateY(24px) scale(.98); } }
 @keyframes account-backdrop-in { from { background: #0000; } to { background: #0009; } }
+@media (min-width: 701px) {
+  .manager-account-dialog { width: min(352px, calc(100% - 32px)); margin: auto; padding: 19.2px; border-radius: 17.6px; }
+  .account-dialog-heading { gap: 9.6px; }
+  .account-dialog-heading .eyebrow { font-size: 8.8px; }
+  .account-dialog-heading h2 { margin-top: 3.2px; font-size: 17.6px; }
+  .account-close { width: 35.2px; height: 35.2px; font-size: 22.4px; }
+  .account-dialog-description { margin: 14.4px 0; font-size: 11.2px; }
+  .account-dialog-actions { gap: 9.6px; }
+  .account-action { min-height: 60.8px; padding: 12.8px; gap: 4.8px; border-radius: 11.2px; }
+  .account-action strong { font-size: 12px; }
+  .account-action span { font-size: 10.4px; }
+}
 @media (max-width: 700px) {
   .manager-account-dialog { width: 100%; max-width: 100%; margin: auto 0 0; border-radius: 24px 24px 0 0; padding: 24px max(20px, env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left)); }
   .manager-toolbar-actions { grid-template-columns: 1fr; }

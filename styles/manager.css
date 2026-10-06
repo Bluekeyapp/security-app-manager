@@ -177,3 +177,33 @@
 .remember-manager input:checked ~ .remember-manager-switch::after { transform: translateX(18px); }
 .remember-manager input:focus-visible ~ .remember-manager-switch { outline: 2px solid var(--blue); outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { .remember-manager-switch, .remember-manager-switch::after { transition: none; } }
+
+/* Native modal keeps focus inside the account window, including on Safari. */
+.account-dialog-open { overflow: hidden; }
+.manager-account-dialog { box-sizing: border-box; width: min(440px, calc(100% - 32px)); max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); padding: 24px; border: 1px solid var(--line); border-radius: 22px; background: var(--surface, #171b21); color: var(--text); box-shadow: 0 24px 90px #0008; overflow-y: auto; overscroll-behavior: contain; }
+.manager-account-dialog[open] { animation: account-window-in 220ms ease-out; }
+.manager-account-dialog::backdrop { background: #0009; animation: account-backdrop-in 220ms ease-out; }
+.manager-account-dialog.is-closing { animation: account-window-out 180ms ease-in forwards; }
+.manager-account-dialog.is-closing::backdrop { animation: account-backdrop-in 180ms ease-in reverse forwards; }
+.account-dialog-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.account-dialog-heading h2 { margin: 4px 0 0; font-size: 22px; }
+.account-close { display: grid; place-items: center; width: 44px; height: 44px; flex-shrink: 0; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: transparent; color: var(--text); font-size: 28px; cursor: pointer; touch-action: manipulation; }
+.account-dialog-description { color: var(--muted); font-size: 14px; margin: 18px 0; }
+.account-dialog-actions { display: grid; gap: 12px; }
+.account-action { width: 100%; display: grid; gap: 6px; min-height: 76px; padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface-2, #20252d); color: var(--text); font: inherit; text-align: left; cursor: pointer; touch-action: manipulation; }
+.account-action strong { font-size: 15px; }
+.account-action span { font-size: 13px; line-height: 1.45; color: var(--muted); }
+.account-action-danger strong { color: #ff8585; }
+.account-action:hover:not(:disabled) { background: #ffffff12; }
+.account-action:disabled { opacity: .45; cursor: default; }
+.account-action:focus-visible, .account-close:focus-visible { outline: 2px solid var(--accent, #ff8a35); outline-offset: 3px; }
+@keyframes account-window-in { from { opacity: 0; transform: translateY(24px) scale(.98); } to { opacity: 1; transform: none; } }
+@keyframes account-window-out { to { opacity: 0; transform: translateY(24px) scale(.98); } }
+@keyframes account-backdrop-in { from { background: #0000; } to { background: #0009; } }
+@media (max-width: 700px) {
+  .manager-account-dialog { width: 100%; max-width: 100%; margin: auto 0 0; border-radius: 24px 24px 0 0; padding: 24px max(20px, env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left)); }
+  .manager-toolbar-actions { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .manager-account-dialog[open], .manager-account-dialog.is-closing, .manager-account-dialog::backdrop, .manager-account-dialog.is-closing::backdrop { animation: none; }
+}

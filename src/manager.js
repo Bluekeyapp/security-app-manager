@@ -58,6 +58,49 @@ const bannerTimers = new Map();
 managerView.addEventListener("submit", handleSubmit);
 managerView.addEventListener("click", handleClick);
 managerView.addEventListener("change", handleChange);
+const accountDialog = document.getElementById("managerAccountDialog");
+const accountButton = document.getElementById("managerAccountButton");
+accountButton?.addEventListener?.("click", () => {
+  if (!state.session || signingOut) return;
+  updateAccountActions();
+  accountDialog.showModal();
+  accountButton.setAttribute("aria-expanded", "true");
+  document.body.classList.add("account-dialog-open");
+});
+accountDialog?.addEventListener?.("click", (event) => {
+  if (event.target === accountDialog || event.target.closest('[data-action="close-account"]')) {
+    closeAccountDialog();
+  } else if (event.target.closest("[data-action]")) {
+    closeAccountDialog(true);
+    handleClick(event);
+  }
+});
+accountDialog?.addEventListener?.("cancel", (event) => {
+  event.preventDefault();
+  closeAccountDialog();
+});
+accountDialog?.addEventListener?.("close", () => {
+  accountDialog.classList.remove("is-closing");
+  accountButton.setAttribute("aria-expanded", "false");
+  document.body.classList.remove("account-dialog-open");
+});
+
+function closeAccountDialog(immediate = false) {
+  if (!accountDialog?.open) return;
+  if (immediate) {
+    accountDialog.close();
+  } else if (!accountDialog.classList.contains("is-closing")) {
+    accountDialog.classList.add("is-closing");
+    window.setTimeout(() => accountDialog.close(), 180);
+  }
+}
+
+function updateAccountActions() {
+  const clear = accountDialog?.querySelector?.('[data-action="clear-activity-history"]');
+  if (!clear) return;
+  clear.disabled = !state.tours.length || deletionPending;
+  accountDialog.querySelector('[data-action="manager-signout"]').disabled = deletionPending || signingOut;
+}
 window.addEventListener("hashchange", () => {
   if (state.session) {
     applyCategory();
@@ -557,6 +600,7 @@ function schedulePeriodRollover() {
 }
 
 function renderLogin() {
+  closeAccountDialog(true);
   document.querySelector(".manager-navigation").hidden = true;
   document.querySelector(".sidebar-account").hidden = true;
   scheduleBannerDismissal();
@@ -634,7 +678,6 @@ function renderDashboard(capturePanels = true) {
       </div>
       <div class="manager-toolbar-actions">
         <button class="icon-text-button" type="button" data-action="refresh-dashboard">Actualiser</button>
-        <button class="icon-text-button" type="button" data-action="manager-signout">Déconnexion</button>
       </div>
     </section>
     ${state.message ? `<p class="form-message success">${escapeHtml(state.message)}</p>` : ""}
@@ -675,7 +718,6 @@ function renderDashboard(capturePanels = true) {
           <p class="eyebrow">Journal d'activité</p>
           <h2>Tournées récentes</h2>
         </div>
-        <button class="icon-text-button delete-button journal-clear-button" type="button" data-action="clear-activity-history" ${state.tours.length && !deletionPending ? "" : "disabled"}>${deletionPending ? "Suppression..." : "Effacer le journal"}</button>
       </div>
       ${renderTourFilters()}
       <div class="manager-list">
@@ -691,6 +733,7 @@ function renderDashboard(capturePanels = true) {
     if (previous) form.replaceWith(previous);
   }
   applyCategory();
+  updateAccountActions();
   if (focused?.isConnected && !focused.closest("[hidden]")) {
     focused.focus({ preventScroll: true });
     if (selection) focused.setSelectionRange(...selection);

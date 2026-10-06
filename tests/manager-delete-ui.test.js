@@ -146,7 +146,9 @@ test("activity journal offers an in-app protected global deletion", async () => 
   const { context, historyCalls, view } = setup(() => false);
   vm.runInContext("state.tours = [{id:'one',status:'completed'},{id:'two',status:'cancelled'}]", context);
   const html = vm.runInContext("renderDashboard(); managerView.innerHTML", context);
-  assert.match(html, /data-action="clear-activity-history"/);
+  assert.doesNotMatch(html, /data-action="clear-activity-history"/);
+  const shell = await readFile(new URL("../manager.html", import.meta.url), "utf8");
+  assert.match(shell, /id="managerAccountDialog"[\s\S]*data-action="clear-activity-history"/);
   context.clearButton = { closest: () => ({ dataset: { action: "clear-activity-history" } }) };
   await vm.runInContext("handleClick({target: clearButton})", context);
   assert.match(view.innerHTML, /role="dialog"/);
@@ -180,7 +182,7 @@ test("activity journal button recovers after a Supabase failure", async () => {
   await vm.runInContext("handleClearActivityHistory()", context);
   assert.doesNotMatch(view.innerHTML, /Suppression\.\.\./);
   assert.match(view.innerHTML, /Une erreur est survenue \(42501\)/);
-  assert.match(view.innerHTML, /data-action="clear-activity-history"/);
+  assert.equal(vm.runInContext("deletionPending", context), false);
 });
 
 test("departure QR can be deleted and has no deactivate control", () => {

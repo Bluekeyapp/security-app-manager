@@ -187,7 +187,7 @@
 .manager-account-dialog.is-closing::backdrop { animation: account-backdrop-in 180ms ease-in reverse forwards; }
 .account-dialog-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 .account-dialog-heading h2 { margin: 4px 0 0; font-size: 22px; }
-.account-close { display: grid; place-items: center; width: 44px; height: 44px; flex-shrink: 0; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: transparent; color: var(--text); font-size: 28px; cursor: pointer; touch-action: manipulation; }
+.account-close { display: grid; place-items: center; width: 44px; height: 44px; flex-shrink: 0; padding: 0; border: 0; border-radius: 50%; background: transparent; color: #fff; cursor: pointer; touch-action: manipulation; }
 .account-close svg { display: block; width: 22.4px; height: 22.4px; pointer-events: none; }
 .account-dialog-description { color: var(--muted); font-size: 14px; margin: 18px 0; }
 .account-dialog-actions { display: grid; gap: 12px; }
@@ -207,7 +207,7 @@
   .account-dialog-heading .eyebrow { font-size: 8.8px; }
   .account-dialog-heading h2 { margin-top: 3.2px; font-size: 17.6px; }
   .account-close { width: 28.16px; height: 28.16px; }
-  .account-close svg { width: 17.92px; height: 17.92px; }
+  .account-close svg { width: 22.4px; height: 22.4px; }
   .account-dialog-description { margin: 14.4px 0; font-size: 11.2px; }
   .account-dialog-actions { gap: 9.6px; }
   .account-action { min-height: 60.8px; padding: 12.8px; gap: 4.8px; border-radius: 11.2px; }
